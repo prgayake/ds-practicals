@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Table Booking</title>
+</head>
+<body>
+    <h1>Table Booking</h1>
+    <div class="table-container" id="tableContainer"></div>
+    <script src="https://cdn.rawgit.com/serratus/quaggaJS/master/dist/quagga.min.js"></script>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+}
+
+h1 {
+    color: #333;
+}
+
+.table-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.table {
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+
+.booked {
+    background-color: #ff7b7b;
+}
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tableContainer = document.getElementById('tableContainer');
+    const scanButton = document.createElement('button');
+    scanButton.textContent = 'Scan QR Code';
+    scanButton.addEventListener('click', startQRCodeScanner);
+    tableContainer.appendChild(scanButton);
+
+    // Number of tables
+    const numberOfTables = 10;
+
+    // Create tables
+    for (let i = 1; i <= numberOfTables; i++) {
+        const table = document.createElement('div');
+        table.className = 'table';
+        table.textContent = i;
+
+        // Add click event listener to each table
+        table.addEventListener('click', function () {
+            toggleBookingStatus(table);
+        });
+
+        tableContainer.appendChild(table);
+    }
+
+    // Function to toggle booking status
+    function toggleBookingStatus(table) {
+        table.classList.toggle('booked');
+        const tableNumber = table.textContent;
+
+        if (table.classList.contains('booked')) {
+            alert(`Table ${tableNumber} booked!`);
+        } else {
+            alert(`Table ${tableNumber} canceled.`);
+        }
+    }
+
+    // Function to start QR code scanner
+    function startQRCodeScanner() {
+        Quagga.init({
+            inputStream: {
+                name: 'Live',
+                type: 'LiveStream',
+                target: document.querySelector('#tableContainer'),
+            },
+            decoder: {
+                readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'code_39_vin_reader', 'codabar_reader', 'upc_reader', 'upc_e_reader', 'i2of5_reader', '2of5_reader', 'code_93_reader'],
+            },
+        }, function (err) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            Quagga.start();
+            Quagga.onDetected(handleDetected);
+        });
+    }
+
+    // Function to handle QR code detection
+    function handleDetected(result) {
+        const qrData = result.codeResult.code;
+        alert(`QR Code scanned. Data: ${qrData}`);
+    }
+});
+  
+</script>
